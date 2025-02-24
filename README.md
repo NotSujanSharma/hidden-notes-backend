@@ -1,4 +1,4 @@
-# Anonymous Messaging API Documentation
+# Hidden Notes API Documentation
 
 ## Introduction
 This API enables users to register, log in, generate a unique link for receiving anonymous messages, submit anonymous messages, and retrieve their messages. It is secure, easy to use, and designed for seamless integration with frontend applications.
