@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { nanoid } = require('nanoid');
 const { validationResult } = require('express-validator');
-const { createUser, getUserByEmail, createLink, linkIdExists, verifyUser, getUserByToken } = require('../models/userModel');
+const { createUser, getUserByEmail, createLink, linkIdExists, verifyUser, getUserByToken, getUserById, updatePassword } = require('../models/userModel');
 const { createToken } = require('../models/tokenModel');
 const { sendVerificationEmail } = require('../utils/email');
+const { get } = require('http');
 
 async function register(req, res) {
     try {
@@ -73,5 +74,33 @@ async function verifyEmail(req, res) {
     }
 }
 
+async function getUserDetails(req, res) {
+    try {
+        const userId = req.userId;
+        const user = await getUserById(userId);
+        res.json({ name:"nibba", email: user.email, emailVerified: user.email_verified });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
 
-module.exports = { register, login, verifyEmail };
+async function changePassword(req, res) {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+        const userId = req.userId;
+        const { newPassword } = req.body;
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+        await updatePassword(userId, passwordHash);
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+
+module.exports = { register, login, verifyEmail, getUserDetails, changePassword };

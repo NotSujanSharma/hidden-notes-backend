@@ -13,6 +13,11 @@ async function getUserByEmail(email) {
     return result.rows[0];
 }
 
+async function getUserById(userId) {
+    const result = await pool.query('SELECT * FROM Users WHERE user_id = $1', [userId]);
+    return result.rows[0];
+}
+
 async function createLink(linkId, userId) {
     await pool.query('INSERT INTO Links (link_id, user_id) VALUES ($1, $2)', [linkId, userId]);
 }
@@ -39,4 +44,8 @@ async function getUserByToken(token, type) {
     return result.rows[0];
 }
 
-module.exports = { createUser, getUserByEmail, createLink, linkIdExists, getUserIdByLinkId, verifyUser, getUserByToken };
+async function updatePassword(userId, passwordHash) {
+    await pool.query('UPDATE Users SET password_hash = $1 WHERE user_id = $2', [passwordHash, userId]);
+}
+
+module.exports = { createUser, getUserByEmail, createLink, linkIdExists, getUserIdByLinkId, verifyUser, getUserByToken, getUserById, updatePassword };
