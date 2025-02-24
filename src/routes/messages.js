@@ -1,6 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const { submitMessage, getMessages } = require('../controllers/messageController');
+const { getMessagingLink } = require('../controllers/linkController');
 const authMiddleware = require('../middleware/authMiddleware');
 const router = express.Router();
 
@@ -15,5 +16,7 @@ router.post(
 );
 
 router.get('/messages', authMiddleware, getMessages);
+
+router.get('/get-link', authMiddleware, getMessagingLink);
 
 module.exports = router;
