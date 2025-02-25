@@ -22,7 +22,7 @@ async function register(req, res) {
 
         let linkId;
         do {
-            linkId = nanoid(12);
+            linkId = nanoid(6);
         } while (await linkIdExists(linkId));
         await createLink(linkId, userId);
 
@@ -32,6 +32,7 @@ async function register(req, res) {
 
         const verificationLink = `http://localhost:${process.env.PORT}/api/verify-email/${token}`;
         await sendVerificationEmail(email, verificationLink);
+        console.log(verificationLink);
 
         res.status(201).json({ message: 'Registered successfully. Please verify your email.' });
     } catch (error) {
@@ -52,7 +53,7 @@ async function login(req, res) {
         }
         if (!user.email_verified) return res.status(403).json({ message: 'Email not verified' });
 
-        const token = jwt.sign({ userId: user.user_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: user.user_id }, process.env.JWT_SECRET, { expiresIn: '1020h' });
         res.json({ token });
     } catch (error) {
         console.error(error);
@@ -78,7 +79,7 @@ async function getUserDetails(req, res) {
     try {
         const userId = req.userId;
         const user = await getUserById(userId);
-        res.json({ name:"nibba", email: user.email, emailVerified: user.email_verified });
+        res.json({ name: "nibba", email: user.email, emailVerified: user.email_verified });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -91,7 +92,21 @@ async function changePassword(req, res) {
         if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
         const userId = req.userId;
-        const { newPassword } = req.body;
+        const user = await getUserById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const { newPassword, currentPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Both old and new passwords are required' });
+        }
+
+        const currentPasswordCorrect = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!currentPasswordCorrect) {
+            return res.status(400).json({ message: 'Invalid password' });
+        }
+
         const passwordHash = await bcrypt.hash(newPassword, 10);
         await updatePassword(userId, passwordHash);
 
