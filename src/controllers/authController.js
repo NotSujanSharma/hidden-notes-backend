@@ -22,21 +22,21 @@ async function register(req, res) {
         const linkId = name.toLowerCase()
             .replace(/[^a-z0-9]/g, '') // remove special characters
             .substring(0, 6); // take first 6 chars
-        
+
         if (await linkIdExists(linkId)) {
             // If exists, append a random number
             const randomSuffix = Math.floor(Math.random() * 1000);
             linkId = linkId.substring(0, 3) + randomSuffix;
         }
-        
+
         await createLink(linkId, userId);
 
         const token = crypto.randomBytes(32).toString('hex');
         const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
         await createToken(userId, token, 'verification', expiresAt);
 
-        const verificationLink = `http://localhost:${process.env.PORT}/api/verify-email/${token}`;
-        // await sendVerificationEmail(email, verificationLink);
+        const verificationLink = `https://api.hiddennotes.xyz/api/verify-email/${token}`;
+        await sendVerificationEmail(email, verificationLink);
         console.log(verificationLink);
 
         res.status(201).json({ message: 'Registered successfully. Please verify your email.' });
