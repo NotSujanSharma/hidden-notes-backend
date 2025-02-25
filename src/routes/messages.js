@@ -9,7 +9,7 @@ router.post(
     '/messages/:link_id',
     [
         body('content').notEmpty().withMessage('Message content is required'),
-        body('category').isIn(['Feedback', 'Question', 'Compliment']).withMessage('Invalid category'),
+        body('category').isIn(['Feedback', 'Question', 'Compliment', 'Inner Feelings', 'Comment']).withMessage('Invalid category'),
         body('captcha').exists().withMessage('CAPTCHA is required'),
     ],
     submitMessage

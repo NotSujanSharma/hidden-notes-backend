@@ -5,6 +5,7 @@ const verifyEmail = require('../controllers/authController').verifyEmail;
 const authMiddleware = require('../middleware/authMiddleware');
 const getUserDetails = require('../controllers/authController').getUserDetails;
 const changePassword = require('../controllers/authController').changePassword;
+const getNameByLinkId = require('../controllers/authController').getNameByLinkId;
 
 
 const router = express.Router();
@@ -61,6 +62,11 @@ router.get(
     authMiddleware,
     getUserDetails
 
+)
+
+router.get(
+    '/user/:link_id',
+    getNameByLinkId
 )
 
 module.exports = router;

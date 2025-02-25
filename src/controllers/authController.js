@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { nanoid } = require('nanoid');
 const { validationResult } = require('express-validator');
-const { createUser, getUserByEmail, createLink, linkIdExists, verifyUser, getUserByToken, getUserById, updatePassword } = require('../models/userModel');
+const { createUser, getUserByEmail, createLink, linkIdExists, verifyUser, getUserByToken, getUserById, updatePassword, getUserByLinkId } = require('../models/userModel');
 const { createToken } = require('../models/tokenModel');
 const { sendVerificationEmail } = require('../utils/email');
 const { get } = require('http');
@@ -118,4 +118,19 @@ async function changePassword(req, res) {
 }
 
 
-module.exports = { register, login, verifyEmail, getUserDetails, changePassword };
+async function getNameByLinkId(req, res) {
+    try {
+        const { link_id } = req.params;
+        console.log(`linkId: ${link_id}`);
+        const user = await getUserByLinkId(link_id);
+        console.log(`user: ${user}`);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        res.json({ name: user.email });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+module.exports = { register, login, verifyEmail, getUserDetails, changePassword, getNameByLinkId };

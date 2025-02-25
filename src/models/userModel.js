@@ -48,4 +48,12 @@ async function updatePassword(userId, passwordHash) {
     await pool.query('UPDATE Users SET password_hash = $1 WHERE user_id = $2', [passwordHash, userId]);
 }
 
-module.exports = { createUser, getUserByEmail, createLink, linkIdExists, getUserIdByLinkId, verifyUser, getUserByToken, getUserById, updatePassword };
+async function getUserByLinkId(linkId) {
+    const result = await pool.query(
+        'SELECT * FROM Users JOIN Links ON Users.user_id = Links.user_id WHERE link_id = $1',
+        [linkId]
+    );
+    return result.rows[0];
+}
+
+module.exports = { createUser, getUserByEmail, createLink, linkIdExists, getUserIdByLinkId, verifyUser, getUserByToken, getUserById, updatePassword, getUserByLinkId };
