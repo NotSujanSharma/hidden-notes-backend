@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { nanoid } = require('nanoid');
 const { validationResult } = require('express-validator');
 const { createUser, getUserByEmail, createLink, linkIdExists, verifyUser, getUserByToken, getUserById, updatePassword, getUserByLinkId } = require('../models/userModel');
 const { createToken } = require('../models/tokenModel');
@@ -20,10 +19,16 @@ async function register(req, res) {
         const passwordHash = await bcrypt.hash(password, 10);
         const userId = await createUser(name, email, passwordHash);
 
-        let linkId;
-        do {
-            linkId = nanoid(6);
-        } while (await linkIdExists(linkId));
+        const linkId = name.toLowerCase()
+            .replace(/[^a-z0-9]/g, '') // remove special characters
+            .substring(0, 6); // take first 6 chars
+        
+        if (await linkIdExists(linkId)) {
+            // If exists, append a random number
+            const randomSuffix = Math.floor(Math.random() * 1000);
+            linkId = linkId.substring(0, 3) + randomSuffix;
+        }
+        
         await createLink(linkId, userId);
 
         const token = crypto.randomBytes(32).toString('hex');
