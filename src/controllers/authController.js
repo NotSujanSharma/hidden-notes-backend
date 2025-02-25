@@ -13,12 +13,12 @@ async function register(req, res) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-        const { email, password } = req.body;
+        const { name, email, password } = req.body;
         const existingUser = await getUserByEmail(email);
         if (existingUser) return res.status(409).json({ message: 'Email already registered' });
 
         const passwordHash = await bcrypt.hash(password, 10);
-        const userId = await createUser(email, passwordHash);
+        const userId = await createUser(name, email, passwordHash);
 
         let linkId;
         do {
@@ -31,7 +31,7 @@ async function register(req, res) {
         await createToken(userId, token, 'verification', expiresAt);
 
         const verificationLink = `http://localhost:${process.env.PORT}/api/verify-email/${token}`;
-        await sendVerificationEmail(email, verificationLink);
+        // await sendVerificationEmail(email, verificationLink);
         console.log(verificationLink);
 
         res.status(201).json({ message: 'Registered successfully. Please verify your email.' });
@@ -79,7 +79,7 @@ async function getUserDetails(req, res) {
     try {
         const userId = req.userId;
         const user = await getUserById(userId);
-        res.json({ name: "nibba", email: user.email, emailVerified: user.email_verified });
+        res.json({ name: user.name, email: user.email, emailVerified: user.email_verified });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -123,10 +123,9 @@ async function getNameByLinkId(req, res) {
         const { link_id } = req.params;
         console.log(`linkId: ${link_id}`);
         const user = await getUserByLinkId(link_id);
-        console.log(`user: ${user}`);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        res.json({ name: user.email });
+        res.json({ name: user.name });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
