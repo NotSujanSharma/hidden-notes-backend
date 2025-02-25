@@ -73,7 +73,7 @@ async function verifyEmail(req, res) {
         if (!user) return res.status(404).json({ message: 'Token not found' });
 
         await verifyUser(user.user_id);
-        res.json({ message: 'Email verified successfully' });
+        res.redirect('https://hiddennotes.xyz/login');
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
