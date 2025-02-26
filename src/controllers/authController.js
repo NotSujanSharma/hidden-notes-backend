@@ -56,7 +56,7 @@ async function login(req, res) {
         if (!user || !(await bcrypt.compare(password, user.password_hash))) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        if (!user.email_verified) return res.status(403).json({ message: 'Please check your Inbox and verify your Email' });
+        // if (!user.email_verified) return res.status(403).json({ message: 'Please check your Inbox and verify your Email' });
 
         const token = jwt.sign({ userId: user.user_id }, process.env.JWT_SECRET, { expiresIn: '1020h' });
         res.json({ token });
