@@ -19,7 +19,7 @@ async function register(req, res) {
         const passwordHash = await bcrypt.hash(password, 10);
         const userId = await createUser(name, email, passwordHash);
 
-        const linkId = name.toLowerCase()
+        let linkId = name.toLowerCase()
             .replace(/[^a-z0-9]/g, '') // remove special characters
             .substring(0, 6); // take first 6 chars
 
